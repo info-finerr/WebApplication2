@@ -6,23 +6,35 @@ name: .NET
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: self-hosted 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Publish
+        run: | 
+          dotnet publish -o publish
+      - name: Backup & Deploy 
+        run: | 
+         $datestamp = Get-Date -Format "yyyyMMddHHmmss" 
+         cd publish 
+         # Remove-Item web.config 
+         # Remove-Item appsettings.json 
+         # Remove-Item appsettings.Development.json 
+         Stop-WebSite 'Demo' 
+         Copy-Item * D:\Demo -Recurse -Force 
+         Start-WebSite 'Demo'     
