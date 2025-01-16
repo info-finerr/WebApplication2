@@ -28,3 +28,13 @@ jobs:
       - name: Publish
         run: | 
           dotnet publish -o publish
+      - name: Backup & Deploy 
+        run: | 
+         $datestamp = Get-Date -Format "yyyyMMddHHmmss" 
+         cd publish 
+         Remove-Item web.config 
+         Remove-Item appsettings.json 
+         Remove-Item appsettings.Development.json 
+         Stop-WebSite 'Demo' 
+         Copy-Item * D:\Demo -Recurse -Force 
+         Start-WebSite 'Demo'     
