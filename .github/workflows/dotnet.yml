@@ -32,9 +32,9 @@ jobs:
         run: | 
          $datestamp = Get-Date -Format "yyyyMMddHHmmss" 
          cd publish 
-         Remove-Item web.config 
-         Remove-Item appsettings.json 
-         Remove-Item appsettings.Development.json 
+         # Remove-Item web.config 
+         # Remove-Item appsettings.json 
+         # Remove-Item appsettings.Development.json 
          Stop-WebSite 'Demo' 
          Copy-Item * D:\Demo -Recurse -Force 
          Start-WebSite 'Demo'     
