@@ -1,3 +1,6 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
 name: .NET
 
 on:
@@ -6,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: self-hosted 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -22,61 +25,35 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release
 
-      - name: Publish
-        run: dotnet publish -o publish
-
-      - name: Backup and Deploy
+      - name: Backup
         run: |
-          # Variables
-          $datestamp = (Get-Date).ToString("yyyyMMddHHmmss")
-          $backupPath = "D:\Backup"
-          $publishPath = "publish"
-          $deployPath = "D:\Demo"
-          $backupZip = Join-Path $backupPath "Demo_Backup_$datestamp.zip"
+           $newFolder = "${{ steps.create-new-folder-name.outputs.NEW_FOLDER }}"
+           $oldFolderBase = "Demo"
+           $zipDestinationPath = "D:\Backup"
+           $oldFolders = Get-ChildItem D:\Demo -Directory | Where-Object {
+             $_.Name -like "*$oldFolderBase*" -and $_.Name -ne $newFolder
+           }
+           if ($oldFolders.Count -gt 0) {
+             foreach ($folder in $oldFolders) {
+               $zipFileName = "$($folder.Name).zip"
+               $zipFilePath = Join-Path $zipDestinationPath $zipFileName
+               Compress-Archive -Path $folder.FullName -DestinationPath $zipFilePath
+               Remove-Item -Path D:\Temp_Published\$folder -Recurse -Force
+             }
+           }
+      
 
-          # Ensure the backup directory exists
-          if (!(Test-Path -Path $backupPath)) {
-              New-Item -ItemType Directory -Path $backupPath
-          }
-
-          # Backup existing deployment
-          if (Test-Path -Path $deployPath) {
-              Compress-Archive -Path $deployPath\* -DestinationPath $backupZip
-          }
-
-          # Stop the IIS site
-          Import-Module WebAdministration
-          Stop-WebSite -Name 'Demo'
-
-          # Remove old deployment files
-          Remove-Item -Path $deployPath\* -Recurse -Force
-
-          # Copy new files to the deployment folder
-          Copy-Item -Path $publishPath\* -Destination $deployPath -Recurse -Force
-
-          # Start the IIS site
-          Start-WebSite -Name 'Demo'
-
----
-
-### Explanation of Fixes:
-
-1. **Backup Handling**:
-   - If `D:\Backup` does not exist, it's created.
-   - Compresses all contents of `D:\Demo` into a timestamped `.zip` file in the backup folder.
-
-2. **IIS Management**:
-   - Properly stops and starts the IIS website using the `WebAdministration` PowerShell module.
-
-3. **File Management**:
-   - Clears old deployment files from `D:\Demo` before copying the new build from the `publish` folder.
-
-4. **Error Handling**:
-   - Ensures that the backup and deployment steps won't fail if the folder paths do not exist initially.
-
-5. **PowerShell Shell**:
-   - Specifies `pwsh` to ensure compatibility with PowerShell Core if you're running on a modern server environment.
-
----
-
-This corrected workflow should resolve your backup issue and provide a reliable deployment process. If any step fails, check the logs for more details, and ensure the self-hosted runner has the required permissions.
+      - name: Publish
+        run: | 
+          dotnet publish -o publish
+      
+      - name: Deploy 
+        run: | 
+         $datestamp = Get-Date -Format "yyyyMMddHHmmss" 
+         cd publish 
+          #Remove-Item web.config 
+          #Remove-Item appsettings.json 
+          #Remove-Item appsettings.Development.json 
+         Stop-WebSite 'Demo' 
+         Copy-Item * D:\Demo -Recurse -Force 
+         Start-WebSite 'Demo'     
