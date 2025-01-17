@@ -28,24 +28,7 @@ jobs:
       - name: Publish
         run: | 
           dotnet publish -o publish
-      - name: Backup
-        run: |
-           Stop-WebSite 'Demo'
-           $newFolder = "${{ steps.create-new-folder-name.outputs.NEW_FOLDER }}"
-           $oldFolderBase = "Demo"
-           $zipDestinationPath = "D:\Backup"
-           $oldFolders = Get-ChildItem D:\Demo -Directory | Where-Object {
-             $_.Name -like "*$oldFolderBase*" -and $_.Name -ne $newFolder
-           }
-           if ($oldFolders.Count -gt 0) {
-             foreach ($folder in $oldFolders) {
-               $zipFileName = "$($folder.Name).zip"
-               $zipFilePath = Join-Path $zipDestinationPath $zipFileName
-               Compress-Archive -Path $folder.FullName -DestinationPath $zipFilePath
-               Remove-Item -Path D:\Temp_Published\$folder -Recurse -Force
-             }
-           }
-           Start-WebSite 'Demo'
+      
       - name: Deploy 
         run: | 
          $datestamp = Get-Date -Format "yyyyMMddHHmmss" 
