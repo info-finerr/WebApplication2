@@ -29,7 +29,7 @@ jobs:
         run: |
             $datestamp = (Get-Date).ToString("yyyyMMddHHmmss")
             $backupFolder = "D:\Backup"
-            $sourceFolder = "D:\Demo"
+            $sourceFolder = "D:\Source\Demo"
             $backupZip = Join-Path $backupFolder "Demo_Backup_$datestamp.zip"
 
             if (!(Test-Path -Path $backupFolder)) {
@@ -54,5 +54,5 @@ jobs:
           #Remove-Item appsettings.json 
           #Remove-Item appsettings.Development.json 
          Stop-WebSite 'Demo' 
-         Copy-Item * D:\Demo -Recurse -Force 
+         Copy-Item * D:\Source\Demo -Recurse -Force 
          Start-WebSite 'Demo'     
