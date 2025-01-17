@@ -30,6 +30,7 @@ jobs:
           dotnet publish -o publish
       - name: Backup
         run: |
+           Stop-WebSite 'Demo'
            $newFolder = "${{ steps.create-new-folder-name.outputs.NEW_FOLDER }}"
            $oldFolderBase = "Demo"
            $zipDestinationPath = "D:\Backup"
@@ -44,6 +45,7 @@ jobs:
                Remove-Item -Path D:\Temp_Published\$folder -Recurse -Force
              }
            }
+           Start-WebSite 'Demo'
       - name: Deploy 
         run: | 
          $datestamp = Get-Date -Format "yyyyMMddHHmmss" 
