@@ -57,27 +57,3 @@ jobs:
 
           # Start the IIS site
           Start-WebSite -Name 'Demo'
-
----
-
-### Explanation of Fixes:
-
-1. **Backup Handling**:
-   - If `D:\Backup` does not exist, it's created.
-   - Compresses all contents of `D:\Demo` into a timestamped `.zip` file in the backup folder.
-
-2. **IIS Management**:
-   - Properly stops and starts the IIS website using the `WebAdministration` PowerShell module.
-
-3. **File Management**:
-   - Clears old deployment files from `D:\Demo` before copying the new build from the `publish` folder.
-
-4. **Error Handling**:
-   - Ensures that the backup and deployment steps won't fail if the folder paths do not exist initially.
-
-5. **PowerShell Shell**:
-   - Specifies `pwsh` to ensure compatibility with PowerShell Core if you're running on a modern server environment.
-
----
-
-This corrected workflow should resolve your backup issue and provide a reliable deployment process. If any step fails, c
